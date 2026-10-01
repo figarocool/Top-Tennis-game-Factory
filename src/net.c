@@ -243,6 +243,11 @@ int net_scan_tick(NetHost *hosts, int *n, int max)
         uint8_t b[8];
         int l = header(b, T_DISCOVER);
         send_to(0xffffffffu, NET_PORT, b, l);
+        char ip[40];                                   /* also the broadcast address of our own /24 network */
+        if (net_local_ip(ip, sizeof ip)) {
+            uint32_t me = net_parse_ip(ip);
+            if (me) send_to((me & 0xffffff00u) | 0xff, NET_PORT, b, l);
+        }
         scan_t0 = now ? now : 1;
     }
     uint8_t b[128];
