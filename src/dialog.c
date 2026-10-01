@@ -259,6 +259,7 @@ static int vk_hit(int gx, int gy)
 static void edit_key(Ctl *c, int sc, int ch)
 {
 #if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
+    if (sc == 0x1f) sc = 0xcb;                              /* the pad's square button (mapped to S) erases, like left */
     if (sc == 0xc8 || sc == 0xd0 || sc == 0xcb || sc == 0xcd) { vita_letter(c, sc); return; }
 #endif
     int len = (int)strlen(c->buf);
