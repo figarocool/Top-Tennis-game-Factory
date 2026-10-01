@@ -35,6 +35,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/private_art/bg0.png)
   set(VPK_FILES
     ${CMAKE_SOURCE_DIR}/sce_sys/icon0.png sce_sys/icon0.png
     ${CMAKE_SOURCE_DIR}/private_art/bg0.png sce_sys/livearea/contents/bg0.png
+    ${CMAKE_SOURCE_DIR}/private_art/pic0.png sce_sys/pic0.png
     ${CMAKE_SOURCE_DIR}/private_art/startup.png sce_sys/livearea/contents/startup.png
     ${CMAKE_SOURCE_DIR}/private_art/template.xml sce_sys/livearea/contents/template.xml)
 endif()
