@@ -35,6 +35,18 @@ nel codice (`src/dsdata.c`, generato da `tools/gen_dsdata.py`).
 Opzioni, salvataggi, replay e Hall of Fame vengono scritti nella stessa cartella. F11 = schermo intero.
 Durante la partita: ESC esce, F3 replay, F5 pausa, F10 schermata "boss".
 
+## Partita in rete (LAN / Wi-Fi)
+
+Dal menu principale, **NETWORK**: uno dei due sceglie **HOST** (gioca in basso e comanda le impostazioni del menu PLAY: campo,
+numero di set, velocità), l'altro **JOIN** (gioca in alto). Funziona tra PC, PS Vita e PSP in qualsiasi combinazione,
+purché siano sulla stessa rete locale (stesso router/Wi-Fi): il guest cerca da solo le partite aperte, oppure si può
+scrivere l'indirizzo IP che l'host vede sullo schermo. Sulla PSP si usa il primo profilo Wi-Fi salvato.
+
+Come funziona: protocollo UDP sulla porta 5757; le due macchine simulano la stessa partita e a ogni fotogramma si
+scambiano solo i tasti premuti (2 fotogrammi di ritardo per nascondere la latenza). Un controllo periodico dello stato
+della partita avverte se le due simulazioni divergono. ESC chiude la partita per entrambi. Sul PC può servire aprire la
+porta UDP 5757 nel firewall. Al momento sono solo partite amichevoli uno contro uno.
+
 ## PS Vita
 
 Scarica `TopTennis.vpk` dalle [Release](../../releases) (oppure compilalo, vedi sotto).

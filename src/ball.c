@@ -23,6 +23,14 @@ void ball_tables_init(void)
     g_line_k = real_to_fx(real48(0xf17f, 0x4a33, 0x0cfc));
 }
 
+/* fingerprint of the trajectory tables: both sides of a network game must compute the same ones */
+uint32_t ball_tables_checksum(void)
+{
+    uint32_t h = 2166136261u;
+    for (int t = 0; t <= 180; t++) h = (h ^ (uint32_t)sin_tab[t]) * 16777619u;
+    return (h ^ (uint32_t)g_line_k) * 16777619u;
+}
+
 /* 1000:1a2e - first t with sin_tab[t] >= v */
 static int sin_inverse(int32_t v)
 {

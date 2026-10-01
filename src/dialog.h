@@ -35,6 +35,7 @@ Ctl *dialog_add_label(Dialog *d, const char *text, int y, int x);
 Ctl *dialog_add_button(Dialog *d, const char *caption, int result, int y, int x);
 Ctl *dialog_add_edit(Dialog *d, char *buf, int maxlen, int visible, int y, int x);
 Ctl *dialog_add_list(Dialog *d, char (*items)[64], int nitems, int rows, int visible_chars, int y, int x);
+extern int (*dialog_tick)(void);        /* see dialog.c */
 int  dialog_run(Dialog *d);              /* returns the result of the activated button (0 = cancel/ESC) */
 
 /* helpers shared with other screens */

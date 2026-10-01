@@ -51,6 +51,7 @@ extern int32_t g_line_k;                      /* 9b5e side line slope (16.16) */
 extern uint16_t g_rec_idx;                    /* 9b62 replay frame being recorded */
 
 void  ball_tables_init(void);                 /* 1000:19d8 */
+uint32_t ball_tables_checksum(void);          /* network play: both machines must agree */
 void  ball_init(TBall *b, uint8_t shadow, uint8_t ball_spr);   /* 1000:1a76 */
 void  ball_throw(TBall *b, uint8_t kind, uint16_t h0, int16_t amp, int16_t y1, int16_t x1, int16_t y0, int16_t x0); /* 1afc */
 void  ball_hit(TBall *b, uint8_t kind, int16_t amp, int16_t y1, int16_t x1);    /* 2202 */

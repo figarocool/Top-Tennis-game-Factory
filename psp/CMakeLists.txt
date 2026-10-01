@@ -8,7 +8,7 @@ list(FILTER SRC EXCLUDE REGEX "assetview\\.c$")
 add_executable(${PROJECT_NAME} ${SRC} psp_main.c)
 
 target_link_libraries(${PROJECT_NAME}
-  SDL2main SDL2 m GL pspvram pspaudio pspvfpu pspdisplay pspgu pspge psphprm pspctrl psppower)
+  SDL2main SDL2 m GL pspnet_apctl pspnet_inet pspnet_resolver pspnet psputility pspvram pspaudio pspvfpu pspdisplay pspgu pspge psphprm pspctrl psppower)
 
 create_pbp_file(
   TARGET ${PROJECT_NAME}

@@ -45,6 +45,7 @@ void player_reset(TPlayer *p);                                                  
 void player_set_pos(TPlayer *p, int pos);                                       /* 1000:36d1 */
 void player_flip(TPlayer *p);                                                   /* 1000:3795 */
 void player_update(TPlayer *p);                                                 /* 1000:3b15 */
+unsigned player_read_local(TPlayer *p);                                        /* buttons of this player's own keys / joystick */
 void player_poll_input(TPlayer *p);                                             /* 1000:3f85 */
 int  player_hits_ball(TPlayer *p);                                              /* 1000:3e1f */
 void player_record(TPlayer *p);                                                 /* 1000:3804 */

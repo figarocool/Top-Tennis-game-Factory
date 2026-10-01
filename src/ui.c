@@ -32,6 +32,7 @@ int season_load_action(Menu *m, MenuItem *it);
 int act_load_replay(Menu *m, MenuItem *it);
 int act_hall_of_fame(Menu *m, MenuItem *it);
 int act_demo(Menu *m, MenuItem *it);
+int act_network(Menu *m, MenuItem *it);
 int act_serve_training(Menu *m, MenuItem *it); int act_machine_continue(Menu *m, MenuItem *it);
 
 int act_exit(Menu *m, MenuItem *it); int act_credits(Menu *m, MenuItem *it); int act_save_options(Menu *m, MenuItem *it);
@@ -116,6 +117,7 @@ void ui_build(void)
     menu_add_command(&menu_main, "@PLAY", NULL, &menu_play);
     menu_add_command(&menu_main, "@DEMO", act_demo, NULL);
     menu_add_command(&menu_main, "@TRAINING", NULL, &menu_training);
+    menu_add_command(&menu_main, "@NETWORK", act_network, NULL);
     menu_add_command(&menu_main, "@OPTIONS", NULL, &menu_options);
     menu_add_command(&menu_main, "@CREDITS", act_credits, NULL);
     menu_add_command(&menu_main, "@EXIT", act_exit, NULL);

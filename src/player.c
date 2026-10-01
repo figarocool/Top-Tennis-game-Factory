@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "joy.h"
+#include "net.h"
 #include "dsimg.h"
 #include "sprites.h"
 #include "platform.h"
@@ -112,7 +113,7 @@ void players_set_team_ids(void)
 }
 
 /* keyboard/joystick -> control bits (1000:3f85) */
-void player_poll_input(TPlayer *p)
+unsigned player_read_local(TPlayer *p)
 {
     unsigned bits = 0;
     if (!p->joy) {
@@ -121,9 +122,14 @@ void player_poll_input(TPlayer *p)
     }
     else {
         bits = joy_bits(p->joy);
-        if (bits && getenv("TT_DEBUG")) fprintf(stderr, "joy bits %02x\n", bits);
     }
-    p->input = bits;
+    return bits;
+}
+
+void player_poll_input(TPlayer *p)
+{
+    /* network game: both machines feed the same buttons of both players (host = near side, guest = far side) */
+    p->input = net_active() ? net_bits(p == pl_near[0] ? 0 : 1) : player_read_local(p);
 }
 
 /* 1000:3b15 - advance the animation, move the sprite, and let the controller pick the next animation */

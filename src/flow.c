@@ -18,13 +18,13 @@
 #include "joy.h"
 #include "sound.h"
 #include "hof.h"
+#include "net.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 /* control types in the OPTIONS menu: 1,2 keyboard sets, 3,4 joysticks, 5 computer */
-enum { CTRL_KB1 = 1, CTRL_KB2, CTRL_JOY1, CTRL_JOY2, CTRL_CPU };
 
 int message_box(const char *title, const char *line1, const char *line2)
 {
@@ -38,7 +38,7 @@ int message_box(const char *title, const char *line1, const char *line2)
 }
 
 /* 1000:dfdf - ask for the human players' names. Returns 0 when cancelled. */
-static int ask_names(int p1_human, int p2_human, char *n1, char *n2)
+int ask_names(int p1_human, int p2_human, char *n1, char *n2)
 {
     char b1[24] = "", b2[24] = "";
     font_select(8);
@@ -93,6 +93,7 @@ int device_check(int type)
 static void setup_keys(TPlayer *p, int type)
 {
     p->joy = NULL;
+    if (type == CTRL_NET) { p->nkeys = 0; return; }
     if (type == CTRL_KB1 || type == CTRL_KB2) player_set_keys(p, opt.keys[type == CTRL_KB2], NULL);
     else if (type == CTRL_JOY1 || type == CTRL_JOY2) { p->nkeys = 0; p->joy = joy_open(type == CTRL_JOY1 ? 1 : 2); }
 }
@@ -130,6 +131,11 @@ int matchflow_play(const MatchSetup *ms, int fade_first)
     spr_render(0, 0);
     video_fade_in(&court, 2);
     music_stop();
+    if (ms->net) {
+        extern void netplay_prepare(void);
+        netplay_prepare();                       /* local reader + state hash, then both machines start counting frames */
+        net_begin_match();
+    }
     if (getenv("TT_SWAP")) { players_apply_pos(0, 1); players_apply_pos(0, 0); score.server_flag ^= 1; }   /* test: far side serves first */
     int winner = play_match();
     video_set_scroll(0, 0);

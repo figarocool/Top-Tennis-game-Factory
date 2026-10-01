@@ -25,7 +25,7 @@ target_link_libraries(${PROJECT_NAME}
   SDL2 m
   SceGxm_stub SceDisplay_stub SceCtrl_stub SceAppMgr_stub SceAppUtil_stub SceAudio_stub SceAudioIn_stub
   SceSysmodule_stub SceIofilemgr_stub SceCommonDialog_stub SceTouch_stub SceHid_stub SceMotion_stub
-  ScePower_stub SceProcessmgr_stub)
+  ScePower_stub SceProcessmgr_stub SceNet_stub SceNetCtl_stub)
 
 vita_create_self(eboot.bin ${PROJECT_NAME} UNSAFE)
 vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin

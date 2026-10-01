@@ -10,6 +10,7 @@
 #include "hud.h"
 #include "dsimg.h"
 #include "platform.h"
+#include "net.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@ void match_set_speed(int fps)
 /* 1000:669c - camera follows the ball, then draw everything and display (waits for the vertical retrace) */
 void camera_update(void)
 {
+    if (net_active()) { net_frame_sync(); if (net_peer_quit()) g_quit_match = 1; }
     int cx, cy;
     int d = 0x50 - g_x;
     if (d < 1) cx = (g_x - 0x154 < 1) ? 0x32 : g_x - 0x122;
@@ -84,8 +86,17 @@ static void wait_key(int sc, int down)
     while ((keys[sc] != 0) != down && !quit_requested) { video_wait_vsync(); }
 }
 
+/* The pauses of the original end after a fixed time; in a network game that count must be the same on both machines,
+ * so it is measured in frames (one iteration = one vertical retrace at 70.086 Hz). */
+static int time_up(uint32_t t0, uint32_t ticks, int *iters)
+{
+    if (net_active()) return ++*iters >= (int)(ticks / (PIT_HZ / 70.086));
+    return timer_ticks() - t0 > ticks;
+}
+
 void pause_check(void)
 {
+    if (net_active()) return;
     if (keys[0x3f]) {                 /* F5: pause until pressed again */
         wait_key(0x3f, 0);
         wait_key(0x3f, 1);
@@ -95,6 +106,7 @@ void pause_check(void)
 
 void boss_check(void)
 {
+    if (net_active()) return;
     if (keys[0x44]) {                 /* F10: boss screen */
         wait_key(0x44, 0);
         Image *boss = img_load_pbm("DATA\\BACKGND\\BOSS_SCR.PBM");
@@ -118,6 +130,11 @@ void boss_check(void)
 int quit_check(int immediate)
 {
     if (quit_requested) { g_quit_match = 1; return 1; }
+    if (net_active()) {                       /* ESC leaves a network game at once, for both players */
+        if (keys[1]) { net_send_quit(); g_quit_match = 1; }
+        if (net_peer_quit()) g_quit_match = 1;
+        return g_quit_match;
+    }
     if (keys[1]) {
         if (!immediate) {
             if (split_line != 200) video_split_slide(1, 200, split_line);
@@ -152,7 +169,7 @@ void show_message(int snd, const char *msg)
     video_wait_vsync();
     video_split_slide(-1, 175, 200);
     uint32_t t0 = timer_ticks();
-    int played = 0;
+    int played = 0, iters = 0;
     for (;;) {
         camera_update();
         update_all_players(1, 1);
@@ -160,8 +177,7 @@ void show_message(int snd, const char *msg)
         boss_check();
         if (quit_check(0)) break;
         if (!snd_busy() && !played) { if (snd) snd_play(snd); played = 1; }
-        uint32_t dt = timer_ticks() - t0;
-        if (dt > 0x24 * 65536u + 0x69df) break;
+        if (time_up(t0, 0x24 * 65536u + 0x69df, &iters)) break;
         if (quit_requested) break;
     }
     video_split_slide(1, 200, 175);
@@ -351,16 +367,15 @@ int play_game(void)
             hud_show_scoreboard(&score);
             video_split_slide(-1, 175, 200);
             uint32_t t0 = timer_ticks();
-            int announced = 0;
+            int announced = 0, iters = 0;
             for (;;) {
                 camera_update();
                 update_all_players(1, 1);
                 pause_check(); boss_check();
-                if (keys[0x3d] && !g_quit_match) { video_split_slide(1, 200, 175); replay_play(); video_split_slide(-1, 175, 200); }
+                if (keys[0x3d] && !g_quit_match && !net_active()) { video_split_slide(1, 200, 175); replay_play(); video_split_slide(-1, 175, 200); }
                 if (quit_check(0)) break;
                 if (!snd_busy() && !announced) { int id = score_announce_id(&score); if (id) snd_play(id); announced = 1; }
-                uint32_t dt = timer_ticks() - t0;
-                if (dt > 0x36 * 65536u + 0x9ecf) break;
+                if (time_up(t0, 0x36 * 65536u + 0x9ecf, &iters)) break;
                 if (quit_requested) break;
             }
             video_split_slide(1, 200, 175);

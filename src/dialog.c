@@ -276,6 +276,8 @@ static void edit_key(Ctl *c, int sc, int ch)
     if (c->cursor >= c->first + c->visible) c->first = c->cursor - c->visible + 1;
 }
 
+int (*dialog_tick)(void);        /* optional: polled every frame by dialog_run; a non-zero value closes the dialog with it */
+
 int dialog_run(Dialog *d)
 {
     static uint8_t snap[VW * VH];
@@ -323,6 +325,7 @@ int dialog_run(Dialog *d)
                     if (d->ctl[i].type == CT_BUTTON && d->ctl[i].hotkey && d->ctl[i].hotkey == toupper(a)) { result = d->ctl[i].result; break; }
             }
         }
+        if (dialog_tick && result < 0) { int t = dialog_tick(); if (t) result = t; }
         /* mouse: click on a control */
         int mx = 0, my = 0;
         static int prev;
