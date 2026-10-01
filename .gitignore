@@ -1,0 +1,19 @@
+# game assets and copyrighted material are never committed
+/orig/
+/data/
+/TOPTEN FULL.RAR
+/build/
+/toptennis
+/tools/assetview
+/tests/test_gfx
+/ghidra_proj/
+__pycache__/
+# reverse-engineering artefacts that contain game code/data or screenshots
+/re/*.bin
+/re/decomp.c
+/re/decomp_clean.c
+/re/dat_index.txt
+/re/funcs.tsv
+/re/strings.txt
+/re/dos/
+/re/preview/
