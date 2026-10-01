@@ -80,7 +80,13 @@ static void vita_pad(void)
 {
     static SDL_Joystick *pad;
     static uint8_t held[256];
-    if (!pad) { if (SDL_NumJoysticks() < 1) return; pad = SDL_JoystickOpen(0); if (!pad) return; }
+    if (!pad) {
+        static int tries;
+        if (SDL_NumJoysticks() < 1) { if (tries++ == 0) fprintf(stderr, "pad: no joystick found\n"); return; }
+        pad = SDL_JoystickOpen(0);
+        if (!pad) { fprintf(stderr, "pad: cannot open the joystick: %s\n", SDL_GetError()); return; }
+        fprintf(stderr, "pad: %s, %d buttons, %d axes\n", SDL_JoystickName(pad), SDL_JoystickNumButtons(pad), SDL_JoystickNumAxes(pad));
+    }
     uint8_t want[256];
     memset(want, 0, sizeof want);
     int ax = SDL_JoystickGetAxis(pad, 0), ay = SDL_JoystickGetAxis(pad, 1);
@@ -109,6 +115,7 @@ static void vita_pad(void)
     for (int i = 1; i < 256; i++) {
         if (want[i] == held[i]) continue;
         held[i] = want[i];
+        { static int logged; if (logged++ < 40) fprintf(stderr, "pad: key %02x %s\n", i, want[i] ? "down" : "up"); }
         if (want[i] && !keys[i]) push_key(i);
         keys[i] = want[i];
     }

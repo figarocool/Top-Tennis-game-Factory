@@ -17,7 +17,7 @@ typedef struct {
     float out1, out2;
 } Op;
 
-typedef struct { Op op[2]; int fnum, block, keyon, fb, conn; } Chan;
+typedef struct { Op op[2]; int fnum, block, keyon, fb, conn; float fb_scale; } Chan;
 
 static Chan  ch[9];
 static int   srate = 44100;
@@ -124,6 +124,7 @@ void opl_write(int reg, int val)
         keyon(k, val >> 5 & 1);
     } else if (reg >= 0xc0 && reg <= 0xc8) {
         ch[reg - 0xc0].fb = val >> 1 & 7;
+        ch[reg - 0xc0].fb_scale = ldexpf(1.0f, ch[reg - 0xc0].fb - 7);
         ch[reg - 0xc0].conn = val & 1;
     }
 }
@@ -156,7 +157,8 @@ static inline float op_run(Chan *c, Op *p, float pm)
     p->phase += p->phase_inc;
     if (att >= 96.0f) return 0;
     if (att < 0) att = 0;
-    uint32_t ph = p->phase + (uint32_t)(int64_t)(pm * 4294967296.0f);
+    /* phase offset in 1/2^32 cycles, through a 32-bit float->int conversion (an int64 one is a slow library call on the PSP) */
+    uint32_t ph = p->phase + ((uint32_t)(int32_t)(pm * 536870912.0f) << 3);
     return sine_tab[p->ws][ph >> (32 - SINE_BITS)] * amp_tab[(int)(att * 10.0f)];
 }
 
@@ -167,7 +169,7 @@ void opl_mix(float *out, int n)
         for (int k = 0; k < 9; k++) {
             Chan *c = &ch[k];
             if (!c->op[0].stage && !c->op[1].stage) continue;
-            float fbm = c->fb ? (c->op[0].out1 + c->op[0].out2) * ldexpf(1.0f, c->fb - 7) : 0;
+            float fbm = c->fb ? (c->op[0].out1 + c->op[0].out2) * c->fb_scale : 0;
             float m = op_run(c, &c->op[0], fbm);
             c->op[0].out2 = c->op[0].out1; c->op[0].out1 = m;
             mix += c->conn ? m + op_run(c, &c->op[1], 0) : op_run(c, &c->op[1], m * 2.0f);

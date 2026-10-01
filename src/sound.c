@@ -8,6 +8,7 @@
 #include "dsimg.h"
 #include <math.h>
 #include <SDL.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,7 +31,7 @@ static const uint8_t *cur;
 static size_t cur_len, cur_pos;
 static uint32_t end_tick;                  /* when the current sound is over (PIT ticks) */
 static int playing;
-static double sfxpos;
+static uint32_t sfxpos;                    /* position in the effect, 16.16 fixed point */
 
 /* ---- music: MOD_FM files (1008:0e94 / 0d30). Header 0x3f2 bytes (+0x2d channels, +0x2e rows*2 per track,
  * instruments of 0x1f bytes at +0x26+id*0x1f holding the OPL registers), then one track per channel of
@@ -105,16 +106,17 @@ static void callback(void *ud, Uint8 *stream, int n)
             if (chunk > mus_samples_left) chunk = mus_samples_left;
         }
         memset(buf, 0, chunk * sizeof(float));
+        const float mus_gain = mus_vol / 100.0f, sfx_gain = volume / 100.0f / 128.0f;
         if (mus) {
             opl_mix(buf, chunk);
             mus_samples_left -= chunk;
             if (mus_samples_left <= 0) { music_tick(); mus_samples_left = OUTRATE / 25; }
         }
         for (int i = 0; i < chunk; i++) {
-            float v = buf[i] * mus_vol / 100.0f;
-            if (cur && (size_t)sfxpos < cur_len) {
-                v += ((int)cur[(size_t)sfxpos] - 128) / 128.0f * volume / 100.0f;
-                sfxpos += (double)RATE / OUTRATE;
+            float v = buf[i] * mus_gain;
+            if (cur && (sfxpos >> 16) < cur_len) {
+                v += (float)((int)cur[sfxpos >> 16] - 128) * sfx_gain;
+                sfxpos += (RATE << 16) / OUTRATE;
             } else if (cur) { cur = NULL; }
             if (v > 1) v = 1; else if (v < -1) v = -1;
             o[done + i] = (int16_t)(v * 30000);

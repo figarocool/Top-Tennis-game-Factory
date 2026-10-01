@@ -30,6 +30,32 @@ int main(int argc, char **argv)
     const char *dir = argc > 1 ? argv[1] : "orig";
 #endif
     snprintf(data_dir, sizeof data_dir, "%s", dir);
+    {   /* test hook for consoles/emulators without environment variables: <dir>/tt_input.txt holds the TT_INPUT script */
+        char tp[600], txt[2048];
+        snprintf(tp, sizeof tp, "%s/tt_input.txt", dir);
+        FILE *tf = fopen(tp, "r");
+        if (tf) {
+            size_t n = fread(txt, 1, sizeof txt - 1, tf);
+            txt[n] = 0;
+            while (n && (txt[n - 1] == '\n' || txt[n - 1] == '\r')) txt[--n] = 0;
+            fclose(tf);
+            setenv("TT_INPUT", txt, 1);
+        }
+        snprintf(tp, sizeof tp, "%s/tt_env.txt", dir);       /* more test variables, one NAME=value per line */
+        tf = fopen(tp, "r");
+        if (tf) {
+            char line[256];
+            while (fgets(line, sizeof line, tf)) {
+                char *eq = strchr(line, '=');
+                if (!eq) continue;
+                *eq = 0;
+                char *v = eq + 1;
+                v[strcspn(v, "\r\n")] = 0;
+                setenv(line, v, 1);
+            }
+            fclose(tf);
+        }
+    }
 #if defined(__vita__) || defined(__PSP__)
     { char lp[600]; snprintf(lp, sizeof lp, "%s/log.txt", dir); freopen(lp, "w", stderr); }        /* for diagnosing problems on the console */
     setvbuf(stderr, NULL, _IONBF, 0);
