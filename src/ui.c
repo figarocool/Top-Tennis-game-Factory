@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "video.h"
 #include "joy.h"
 #include "sound.h"
 #include <stdio.h>
@@ -105,10 +106,15 @@ void ui_build(void)
         "PLAYER @4 .. KEYBOARD 1/PLAYER @4 .. KEYBOARD 2/PLAYER @4 .. JOYSTICK 1/PLAYER @4 .. JOYSTICK 2/PLAYER @4 ......... CPU" };
     static const int pdef[4] = { 0, 4, 4, 4 };       /* values of the shipped TENNIS.OPT */
     for (int i = 0; i < 4; i++) menu_add_choice(&menu_options, pl[i], pdef[i]);
+#if defined(__vita__) || defined(__PSP__)
+    /* no keyboard to redefine and no analog game port to calibrate: the room is used for the screen format */
+    menu_add_choice(&menu_options, "SCR@EEN FORMAT .... 4:3/SCR@EEN FORMAT ... 16:9", g_aspect - 1);
+#else
     menu_add_command(&menu_options, "@REDEFINE KEYBOARD 1", act_redefine_kb1, NULL);
     menu_add_command(&menu_options, "R@EDEFINE KEYBOARD 2", act_redefine_kb2, NULL);
     menu_add_command(&menu_options, "@CALIBRATE JOYSTICK 1", act_calibrate_j1, NULL);
     menu_add_command(&menu_options, "C@ALIBRATE JOYSTICK 2", act_calibrate_j2, NULL);
+#endif
     menu_add_command(&menu_options, "@SAVE OPTIONS", act_save_options, NULL);
     menu_add_command(&menu_options, "@LOAD OPTIONS", act_load_options, NULL);
     menu_add_command(&menu_options, "@MAIN MENU", menu_close_action, NULL);
@@ -129,6 +135,9 @@ void ui_apply_options(void)
     static const int pct[5] = { 0, 20, 47, 73, 100 };       /* mixer levels 0,3,7,11,15 of 15 */
     int sfx = menu_choice(&menu_options, OPT_SFX);
     if (sfx >= 1 && sfx <= 5) { snd_set_volume(pct[sfx - 1]); snd_set_enabled(sfx > 1); }
+#if defined(__vita__) || defined(__PSP__)
+    { int sc = menu_choice(&menu_options, OPT_SCREEN); if (sc >= 1 && sc <= 2 && sc != g_aspect) video_set_aspect(sc); }
+#endif
     int mus = menu_choice(&menu_options, OPT_MUSIC);
     if (mus >= 1 && mus <= 5) {
         static int last = -1;

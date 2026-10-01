@@ -12,6 +12,7 @@
 #include "sound.h"
 #include "dsimg.h"
 #include "platform.h"
+#include "screens.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -49,7 +50,7 @@ int game_boot(const char *dir)
 {
     char p[512];
     snprintf(p, sizeof p, "%s/TENNIS.DAT", dir);
-    if (pak_open(p)) { fprintf(stderr, "cannot open %s\n", p); return -1; }
+    if (pak_open(p)) { fprintf(stderr, "cannot open %s\n", p); notice_missing_data(dir); return -1; }
     if (ds_load(NULL)) return -1;
     if (plat_init() || video_init()) return -1;
     if (load_court_assets()) return -1;

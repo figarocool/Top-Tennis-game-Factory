@@ -22,6 +22,10 @@ extern int     split_line;           /* first scanline of the status bar; 200 = 
 int  video_init(void);
 void video_shutdown(void);
 void video_toggle_fullscreen(void);
+/* Screen format: 1 = 4:3 (original proportions, black bars on wide screens), 2 = 16:9 (the picture is stretched to fill) */
+extern int g_aspect;
+void video_set_aspect(int mode);
+void video_touch_to_game(float nx, float ny, float *gx, float *gy);   /* normalised screen point -> 320x200 game pixels */
 void video_refresh(void);                /* re-display the last composed frame */
 void video_present(void);                /* compose current state and show it */
 void video_wait_vsync(void);             /* present + wait for next 70 Hz tick (FUN_1018_1bd1) */

@@ -32,7 +32,7 @@ nel codice (`src/dsdata.c`, generato da `tools/gen_dsdata.py`).
     make
     ./toptennis cartella_del_gioco      # deve contenere TENNIS.DAT; senza argomento usa ./orig
 
-Opzioni, salvataggi, replay e Hall of Fame vengono scritti nella stessa cartella. F11 = schermo intero.
+Opzioni, salvataggi, replay e Hall of Fame vengono scritti nella stessa cartella. F11 = schermo intero, F12 = formato dello schermo 4:3 / 16:9 (sulle console si sceglie dal menu OPTIONS, di default 16:9). Se manca `TENNIS.DAT` il gioco lo spiega a schermo.
 Durante la partita: ESC esce, F3 replay, F5 pausa, F10 schermata "boss".
 
 ## Partita in rete (LAN / Wi-Fi)

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "options.h"
+#include "video.h"
 #include "ui.h"
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +30,7 @@ void opt_from_menus(OptFile *o)
         int c = menu_choice(&menu_machine, i);
         o->o[3 + i] = c == 13 ? '?' : (uint8_t)(c + '@');
     }
-    o->o[16] = 0;
+    o->o[16] = (uint8_t)g_aspect;             /* screen format (was unused in the original file) */
     o->o[17] = menu_choice(&menu_training, TRN_SIDE) == 1;
     o->o[18] = menu_choice(&menu_training, TRN_POSITION) == 1;
     o->o[19] = (uint8_t)menu_choice(&menu_training, TRN_DELAY);
@@ -57,6 +58,10 @@ void opt_to_menus(const OptFile *o)
     menu_set_choice(&menu_options, OPT_SFX, o->o[22]);
     menu_set_choice(&menu_options, OPT_SPEED, o->o[23]);
     for (int i = 0; i < 4; i++) menu_set_choice(&menu_options, OPT_P1 + i, o->o[24 + i]);
+    if (o->o[16] == 1 || o->o[16] == 2) video_set_aspect(o->o[16]);       /* 0 = file of the original game: keep the default */
+#if defined(__vita__) || defined(__PSP__)
+    menu_set_choice(&menu_options, OPT_SCREEN, g_aspect);
+#endif
 }
 
 static void opt_path(char *p, size_t n) { snprintf(p, n, "%s/TENNIS.OPT", data_dir); }

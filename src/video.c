@@ -19,6 +19,28 @@ static uint32_t      next_vsync;
 
 #define VSYNC_TICKS (PIT_HZ * 1000u / 70086u * 1u)   /* 70.086 Hz */
 
+int g_aspect =
+#if defined(__vita__) || defined(__PSP__)
+    2;
+#else
+    1;
+#endif
+
+void video_set_aspect(int mode)
+{
+    g_aspect = mode == 2 ? 2 : 1;
+    if (ren) SDL_RenderSetLogicalSize(ren, 960, g_aspect == 2 ? 544 : 720);
+}
+
+void video_touch_to_game(float nx, float ny, float *gx, float *gy)
+{
+    /* the logical screen (960 x 720 or 960 x 544) is fitted into the 960 x 544 display of the Vita */
+    float lh = g_aspect == 2 ? 544.0f : 720.0f;
+    float scale = 544.0f / lh, xoff = (960.0f - 960.0f * scale) / 2;
+    *gx = (nx * 960.0f - xoff) / scale / 3.0f;
+    *gy = (ny * 544.0f) / scale * 200.0f / lh;
+}
+
 int video_init(void)
 {
 #ifdef __PSP__
@@ -35,7 +57,7 @@ int video_init(void)
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren) ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
     if (!ren) return -1;
-    SDL_RenderSetLogicalSize(ren, 960, 720);          /* 320x200 is shown with a 4:3 aspect, like a CRT */
+    SDL_RenderSetLogicalSize(ren, 960, g_aspect == 2 ? 544 : 720);          /* 320x200 is shown with a 4:3 aspect, like a CRT */
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCR_W, SCR_H);
     if (!tex) return -1;

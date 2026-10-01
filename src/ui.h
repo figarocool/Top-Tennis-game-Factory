@@ -7,7 +7,7 @@ extern Menu menu_main, menu_play, menu_tour, menu_season, menu_machine, menu_tra
 
 /* settings stored in the menus' choice items (the original keeps them there too) */
 enum { PLAY_FRIENDLY = 1, PLAY_TOURNAMENT, PLAY_SEASON, PLAY_NUMBER, PLAY_CPU, PLAY_LENGTH, PLAY_COURT, PLAY_REPLAY, PLAY_HALL };
-enum { OPT_MUSIC = 1, OPT_SFX, OPT_SPEED, OPT_P1, OPT_P2, OPT_P3, OPT_P4 };
+enum { OPT_MUSIC = 1, OPT_SFX, OPT_SPEED, OPT_P1, OPT_P2, OPT_P3, OPT_P4, OPT_SCREEN };      /* OPT_SCREEN exists on the handhelds only */
 enum { TRN_SERVE = 1, TRN_MACHINE, TRN_SIDE, TRN_POSITION, TRN_DELAY, TRN_COURT };
 
 void ui_build(void);

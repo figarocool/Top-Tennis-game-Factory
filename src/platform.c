@@ -137,10 +137,8 @@ void plat_poll(void)
         case SDL_QUIT: quit_requested = 1; break;
         case SDL_FINGERDOWN: touch_x = e.tfinger.x; touch_y = e.tfinger.y; touch_pending = 1;
 #ifdef __vita__
-            {   /* the 960x720 logical screen is fitted into 960x544: map the touch to game pixels */
-                float scale = 544.0f / 720.0f, xoff = (960.0f - 960.0f * scale) / 2;
-                vcur_x = (e.tfinger.x * 960.0f - xoff) / scale / 3.0f;
-                vcur_y = e.tfinger.y * 544.0f / scale * 200.0f / 720.0f;
+            {
+                video_touch_to_game(e.tfinger.x, e.tfinger.y, &vcur_x, &vcur_y);
                 vcur_x = vcur_x < 0 ? 0 : vcur_x > 319 ? 319 : vcur_x;
                 vcur_y = vcur_y < 0 ? 0 : vcur_y > 199 ? 199 : vcur_y;
                 vtap_until = SDL_GetTicks() + 70;
@@ -154,6 +152,7 @@ void plat_poll(void)
             if (down && !e.key.repeat && !keys[sc]) push_key(sc);
             keys[sc] = down;
             if (down && e.key.keysym.scancode == SDL_SCANCODE_F11) video_toggle_fullscreen();
+            if (down && e.key.keysym.scancode == SDL_SCANCODE_F12) video_set_aspect(g_aspect == 2 ? 1 : 2);
             break; }
         case SDL_WINDOWEVENT:
             if (e.window.event == SDL_WINDOWEVENT_EXPOSED) video_refresh();
