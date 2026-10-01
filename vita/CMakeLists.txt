@@ -29,10 +29,11 @@ target_link_libraries(${PROJECT_NAME}
 
 vita_create_self(eboot.bin ${PROJECT_NAME} UNSAFE)
 set(VPK_FILES ${CMAKE_SOURCE_DIR}/sce_sys/icon0.png sce_sys/icon0.png)
-# optional private LiveArea art (not in the repository): bg0.png, startup.png, icon0.png, template.xml in vita/private_art
+# optional private LiveArea art (not in the repository): bg0.png, startup.png, template.xml in vita/private_art;
+# the bubble icon stays the generic one
 if(EXISTS ${CMAKE_SOURCE_DIR}/private_art/bg0.png)
   set(VPK_FILES
-    ${CMAKE_SOURCE_DIR}/private_art/icon0.png sce_sys/icon0.png
+    ${CMAKE_SOURCE_DIR}/sce_sys/icon0.png sce_sys/icon0.png
     ${CMAKE_SOURCE_DIR}/private_art/bg0.png sce_sys/livearea/contents/bg0.png
     ${CMAKE_SOURCE_DIR}/private_art/startup.png sce_sys/livearea/contents/startup.png
     ${CMAKE_SOURCE_DIR}/private_art/template.xml sce_sys/livearea/contents/template.xml)
