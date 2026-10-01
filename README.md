@@ -34,3 +34,16 @@ Hall of Fame, effetti sonori, musica FM.
 `re/` contiene note di analisi (`ANALYSIS.md`), decompilazione e script Ghidra; `tools/` estrattori
 (`extract_dat.py`, `cbe.py`) e lo script per confrontare con DOSBox (`dosrun.sh`).
 Variabili di test: `TT_CTRL=p1,p2,p3,p4` (forza i controlli, 5 = CPU), `TT_VJOY="frame:x:y:pulsanti,..."` (joystick virtuale), `TT_SHOT`, `TT_SHOT_FRAMES`, `TT_INPUT`, `TT_MENU`, `TT_DEBUG`.
+
+## PS Vita
+
+Il progetto per VitaSDK è in `vita/`:
+
+    export VITASDK=/usr/local/vitasdk
+    cd vita && mkdir build && cd build && cmake .. && make      # produce TopTennis.vpk
+
+Installa il VPK (VitaShell) e copia `TENNIS.DAT` e `TENNIS.EXE` del gioco originale in `ux0:data/TopTennis/`
+(lì vengono scritti anche opzioni, salvataggi e replay). Comandi: croce/levetta = frecce, croce = invio/fuoco,
+cerchio = Esc, triangolo = F3 (replay), quadrato = S, Start = pausa, L = Y, R = N. Nei campi nome:
+su/giù cambiano la lettera, destra passa alla successiva, sinistra cancella, croce conferma.
+Compila ma non è stato provato su una console o su Vita3K.

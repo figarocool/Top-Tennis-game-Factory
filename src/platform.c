@@ -68,8 +68,40 @@ int plat_init(void)
 
 void plat_quit(void) { SDL_Quit(); }
 
+#ifdef __vita__
+/* The Vita has no keyboard: the pad drives the same key table the DOS game reads.
+ * d-pad / left stick = arrows, cross = Enter+Space (fire), circle = Esc, triangle = F3 (replay), square = S,
+ * start = F5 (pause), select = F10, L = Y, R = N. */
+static void vita_pad(void)
+{
+    static SDL_Joystick *pad;
+    static uint8_t held[256];
+    if (!pad) { if (SDL_NumJoysticks() < 1) return; pad = SDL_JoystickOpen(0); if (!pad) return; }
+    uint8_t want[256];
+    memset(want, 0, sizeof want);
+    int ax = SDL_JoystickGetAxis(pad, 0), ay = SDL_JoystickGetAxis(pad, 1);
+    #define B(n) SDL_JoystickGetButton(pad, n)
+    want[0xc8] = B(8) || ay < -16000;  want[0xd0] = B(6) || ay > 16000;
+    want[0xcb] = B(7) || ax < -16000;  want[0xcd] = B(9) || ax > 16000;
+    want[0x1c] = want[0x39] = B(2);    want[0x01] = B(1);
+    want[0x3d] = B(0);                 want[0x1f] = B(3);
+    want[0x3f] = B(11);                want[0x44] = B(10);
+    want[0x15] = B(4);                 want[0x31] = B(5);
+    #undef B
+    for (int i = 1; i < 256; i++) {
+        if (want[i] == held[i]) continue;
+        held[i] = want[i];
+        if (want[i] && !keys[i]) push_key(i);
+        keys[i] = want[i];
+    }
+}
+#endif
+
 void plat_poll(void)
 {
+#ifdef __vita__
+    vita_pad();
+#endif
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {

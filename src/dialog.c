@@ -195,8 +195,41 @@ static int default_button(const Dialog *d)
     return 0;
 }
 
+#ifdef __vita__
+/* no keyboard: Up/Down cycle the letter before the cursor, Right starts the next letter, Left erases */
+static void vita_letter(Ctl *c, int sc)
+{
+    static const char set[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-";
+    static int pending;
+    int len = (int)strlen(c->buf);
+    if (sc == 0xc8 || sc == 0xd0) {
+        int n = (int)sizeof set - 1;
+        if (!pending || c->cursor == 0) {
+            if (len >= c->maxlen) return;
+            memmove(c->buf + c->cursor + 1, c->buf + c->cursor, len - c->cursor + 1);
+            c->buf[c->cursor++] = sc == 0xc8 ? 'A' : 'Z';
+            pending = 1;
+        } else {
+            char *ch = &c->buf[c->cursor - 1];
+            int i = (int)(strchr(set, *ch) ? strchr(set, *ch) - set : 0);
+            i = (i + (sc == 0xc8 ? 1 : n - 1)) % n;
+            *ch = set[i];
+        }
+    } else if (sc == 0xcd) pending = 0;
+    else if (sc == 0xcb) {
+        pending = 0;
+        if (c->cursor > 0) { memmove(c->buf + c->cursor - 1, c->buf + c->cursor, len - c->cursor + 1); c->cursor--; }
+    }
+    if (c->cursor < c->first) c->first = c->cursor;
+    if (c->cursor >= c->first + c->visible) c->first = c->cursor - c->visible + 1;
+}
+#endif
+
 static void edit_key(Ctl *c, int sc, int ch)
 {
+#ifdef __vita__
+    if (sc == 0xc8 || sc == 0xd0 || sc == 0xcb || sc == 0xcd) { vita_letter(c, sc); return; }
+#endif
     int len = (int)strlen(c->buf);
     if (sc == 0xcb) { if (c->cursor > 0) c->cursor--; }
     else if (sc == 0xcd) { if (c->cursor < len) c->cursor++; }

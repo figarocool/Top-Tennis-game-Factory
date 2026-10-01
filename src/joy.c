@@ -78,8 +78,17 @@ unsigned joy_bits(Joystick *j)
     if (x > DEAD) b |= 2;
     if (y < -DEAD) b |= 4;
     if (y > DEAD) b |= 8;
+#ifdef __vita__
+    if (SDL_JoystickGetButton(d, 2)) b |= 0x10;                         /* cross */
+    if (SDL_JoystickGetButton(d, 3)) b |= 0x20;                         /* square */
+    if (SDL_JoystickGetButton(d, 8)) b |= 4;                            /* d-pad */
+    if (SDL_JoystickGetButton(d, 6)) b |= 8;
+    if (SDL_JoystickGetButton(d, 7)) b |= 1;
+    if (SDL_JoystickGetButton(d, 9)) b |= 2;
+#else
     if (SDL_JoystickGetButton(d, 0)) b |= 0x10;
     if (SDL_JoystickGetButton(d, 1) || SDL_JoystickGetButton(d, 2)) b |= 0x20;
+#endif
     return b;
 }
 

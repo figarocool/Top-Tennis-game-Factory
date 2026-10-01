@@ -17,7 +17,12 @@
 
 int main(int argc, char **argv)
 {
+#ifdef __vita__
+    const char *dir = "ux0:data/TopTennis";           /* copy TENNIS.DAT and TENNIS.EXE of the original game here */
+    (void)argc; (void)argv;
+#else
     const char *dir = argc > 1 ? argv[1] : "orig";
+#endif
     snprintf(data_dir, sizeof data_dir, "%s", dir);
     if (game_boot(dir)) return 1;
     cursor_init();

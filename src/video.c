@@ -22,7 +22,11 @@ static uint32_t      next_vsync;
 int video_init(void)
 {
     win = SDL_CreateWindow("Top Tennis", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 960, 720,
+#ifdef __vita__
+                           SDL_WINDOW_FULLSCREEN);
+#else
                            SDL_WINDOW_RESIZABLE);
+#endif
     if (!win) return -1;
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren) ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
