@@ -195,7 +195,7 @@ static int default_button(const Dialog *d)
     return 0;
 }
 
-#if defined(__vita__) || defined(TT_TOUCHKB)
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
 /* no keyboard: Up/Down cycle the letter before the cursor, Right starts the next letter, Left erases */
 static void vita_letter(Ctl *c, int sc)
 {
@@ -225,7 +225,7 @@ static void vita_letter(Ctl *c, int sc)
 }
 #endif
 
-#if defined(__vita__) || defined(TT_TOUCHKB)
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
 /* On-screen keyboard for the touch screen: 14 x 3 keys under the dialog. */
 enum { VK_COLS = 14, VK_ROWS = 3, VK_W = 22, VK_H = 18, VK_X = 6, VK_Y = 145 };
 static const char vk_keys[VK_COLS * VK_ROWS + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-\x04\x03\x01\x02";   /* 4 space, 3 backspace, 1 OK, 2 cancel */
@@ -258,7 +258,7 @@ static int vk_hit(int gx, int gy)
 
 static void edit_key(Ctl *c, int sc, int ch)
 {
-#if defined(__vita__) || defined(TT_TOUCHKB)
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
     if (sc == 0xc8 || sc == 0xd0 || sc == 0xcb || sc == 0xcd) { vita_letter(c, sc); return; }
 #endif
     int len = (int)strlen(c->buf);
@@ -287,7 +287,7 @@ int dialog_run(Dialog *d)
     while (result < 0 && !quit_requested) {
         memcpy(vpage, snap, sizeof snap);
         draw_dialog(d);
-#if defined(__vita__) || defined(TT_TOUCHKB)
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
         static int kb_hidden;
         int kb = d->ctl[d->focus].type == CT_EDIT && !kb_hidden;
         if (kb) vk_draw();
@@ -329,7 +329,7 @@ int dialog_run(Dialog *d)
         {
             int down = plat_mouse(&mx, &my);
             int click = down && !prev;
-#if defined(__vita__) || defined(TT_TOUCHKB)
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
             if (click && d->ctl[d->focus].type == CT_EDIT) {
                 Ctl *f = &d->ctl[d->focus];
                 int inside_edit = mx >= f->x && mx <= f->x + f->w && my >= f->y && my <= f->y + f->h;

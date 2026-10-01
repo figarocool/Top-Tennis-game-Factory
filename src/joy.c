@@ -78,7 +78,7 @@ unsigned joy_bits(Joystick *j)
     if (x > DEAD) b |= 2;
     if (y < -DEAD) b |= 4;
     if (y > DEAD) b |= 8;
-#ifdef __vita__
+#if defined(__vita__) || defined(__PSP__)
     if (SDL_JoystickGetButton(d, 2)) b |= 0x10;                         /* cross */
     if (SDL_JoystickGetButton(d, 3)) b |= 0x20;                         /* square */
     if (SDL_JoystickGetButton(d, 8)) b |= 4;                            /* d-pad */

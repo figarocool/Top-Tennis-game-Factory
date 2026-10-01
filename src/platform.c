@@ -68,8 +68,8 @@ int plat_init(void)
 
 void plat_quit(void) { SDL_Quit(); }
 
-#ifdef __vita__
-/* The Vita has no keyboard: the pad drives the same key table the DOS game reads.
+#if defined(__vita__) || defined(__PSP__)
+/* The Vita and the PSP have no keyboard: the pad drives the same key table the DOS game reads.
  * d-pad / left stick = arrows, cross = Enter+Space (fire), circle = Esc, triangle = F3 (replay), square = S,
  * start = F5 (pause), select = F10, L = Y, R = N. */
 static float vcur_x = 160, vcur_y = 100;
@@ -115,8 +115,6 @@ static void vita_pad(void)
 }
 #endif
 
-#ifdef __vita__
-#endif
 static float touch_x, touch_y;
 static int   touch_pending;
 
@@ -130,7 +128,7 @@ int plat_touch_get(float *x, float *y)
 
 void plat_poll(void)
 {
-#ifdef __vita__
+#if defined(__vita__) || defined(__PSP__)
     vita_pad();
 #endif
     SDL_Event e;
@@ -217,7 +215,7 @@ uint16_t rnd(uint16_t n)
 
 int plat_mouse(int *x, int *y)
 {
-#ifdef __vita__
+#if defined(__vita__) || defined(__PSP__)
     vmenu_mode = 4;
     *x = (int)vcur_x; *y = (int)vcur_y;
     return vcur_btn || SDL_GetTicks() < vtap_until;

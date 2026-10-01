@@ -53,6 +53,17 @@ Per compilarlo serve [VitaSDK](https://vitasdk.org):
     export VITASDK=/usr/local/vitasdk
     cd vita && mkdir build && cd build && cmake .. && make      # produce TopTennis.vpk
 
+## PSP (sperimentale)
+
+Il progetto per PSPDEV è in `psp/`:
+
+    export PSPDEV=/usr/local/pspdev && export PATH=$PSPDEV/bin:$PATH
+    cd psp && mkdir build && cd build && psp-cmake .. && make      # produce EBOOT.PBP
+
+Copia `EBOOT.PBP` e `TENNIS.DAT` nella stessa cartella, per esempio `ms0:/PSP/GAME/TopTennis/`. I comandi sono quelli della Vita;
+non c'è il touch, quindi nei menu la levetta analogica muove il puntatore (croce = click) e i nomi si scrivono con la tastiera
+a schermo. Compila, ma non è stato provato né su una PSP né su PPSSPP: potrebbero servire ritocchi alle prestazioni.
+
 ## Come è fatto
 
 | Cartella | Contenuto |

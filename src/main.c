@@ -17,15 +17,21 @@
 
 int main(int argc, char **argv)
 {
-#ifdef __vita__
+#ifdef __PSP__
+    static char psp_dir[256];                          /* TENNIS.DAT sits next to EBOOT.PBP */
+    snprintf(psp_dir, sizeof psp_dir, "%s", argc > 0 && argv[0] ? argv[0] : "ms0:/PSP/GAME/TopTennis/EBOOT.PBP");
+    char *slash = strrchr(psp_dir, '/');
+    if (slash) *slash = 0; else snprintf(psp_dir, sizeof psp_dir, "ms0:/PSP/GAME/TopTennis");
+    const char *dir = psp_dir;
+#elif defined(__vita__)
     const char *dir = "ux0:data/TopTennis";           /* copy TENNIS.DAT of the original game here */
     (void)argc; (void)argv;
 #else
     const char *dir = argc > 1 ? argv[1] : "orig";
 #endif
     snprintf(data_dir, sizeof data_dir, "%s", dir);
-#ifdef __vita__
-    freopen("ux0:data/TopTennis/log.txt", "w", stderr);        /* for diagnosing problems on the console */
+#if defined(__vita__) || defined(__PSP__)
+    { char lp[600]; snprintf(lp, sizeof lp, "%s/log.txt", dir); freopen(lp, "w", stderr); }        /* for diagnosing problems on the console */
     setvbuf(stderr, NULL, _IONBF, 0);
     fprintf(stderr, "Top Tennis starting\n");
 #endif
