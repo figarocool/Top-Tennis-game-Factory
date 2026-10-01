@@ -1,5 +1,7 @@
 /* A player's racket hits the ball: the animation that is playing (the stroke type) chooses the target
  * point on the opponent's side, the ball speed and the arc amplitude. Original: 1000:259c and 3126. */
+#include <stdio.h>
+#include <stdlib.h>
 #include "player.h"
 #include "game.h"
 
@@ -23,8 +25,8 @@ void ball_shot(TBall *b, uint8_t a)
         switch (a) {
         case 0x17: ball_hit(b, 2, bh, k_slow + 0x7a, near * 0x50 + 0xa5); break;
         case 0x20: ball_hit(b, 3, bh, k_fast + 0x7a, near * 0x50 + 0xa5); break;
-        case 0x1f: ball_hit(b, 3, bh, k_fast + 0x7a, near * 0x50 - 0x74); break;
-        case 0x1d: ball_hit(b, 2, bh, k_slow + 0x7a, near * 0x50 - 0x74); break;
+        case 0x1f: ball_hit(b, 3, bh, k_fast + 0x7a, near * 0x50 + 0x8c); break;   /* Byte arithmetic in the original: 0x50*n - 0x74 wraps to + 0x8c */
+        case 0x1d: ball_hit(b, 2, bh, k_slow + 0x7a, near * 0x50 + 0x8c); break;
         case 0x21: ball_hit(b, 3, bh, k_fast + 0x7a, near * 0x50 + 200); break;
         case 0x1e: ball_hit(b, 2, bh, k_slow + 0x7a, near * 0x50 + 200); break;
         case 0x12: ball_hit(b, 2, 0x23, m + 0x73, bx - 0x28 + (bx > 0xf0) * -0x14); break;

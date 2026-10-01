@@ -178,7 +178,9 @@ uint32_t timer_ticks(void)
     static uint64_t base;
     uint64_t f = SDL_GetPerformanceFrequency(), c = SDL_GetPerformanceCounter();
     if (!base) base = c;
-    return (uint32_t)(((c - base) * PIT_HZ) / f);
+    static int turbo = -1;                          /* test hook: TT_TURBO=n runs the game's clock n times faster */
+    if (turbo < 0) turbo = getenv("TT_TURBO") ? atoi(getenv("TT_TURBO")) : 1;
+    return (uint32_t)(((c - base) * PIT_HZ * (turbo > 0 ? turbo : 1)) / f);
 }
 
 void plat_sleep_ms(int ms) { SDL_Delay(ms); }
