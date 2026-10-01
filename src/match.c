@@ -144,7 +144,13 @@ int quit_check(int immediate)
             video_split_slide(-1, 175, 200);
             int k;
             key_flush();
-            do { video_wait_vsync(); k = key_pressed_scancode(); if (quit_requested) k = 0x15; } while (k != 0x15 && k != 0x31);
+            do {
+                video_wait_vsync(); k = key_pressed_scancode(); if (quit_requested) k = 0x15;
+#if defined(__vita__) || defined(__PSP__)
+                if (k == 0x1c || k == 0x39) k = 0x15;         /* cross = yes */
+                else if (k == 0x1f) k = 0x31;                 /* square = no */
+#endif
+            } while (k != 0x15 && k != 0x31);
             g_quit_match = k == 0x15;
             video_split_slide(1, 200, 175);
         } else g_quit_match = 1;

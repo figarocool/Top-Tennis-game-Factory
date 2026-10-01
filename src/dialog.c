@@ -301,7 +301,14 @@ int dialog_run(Dialog *d)
         if (sc) {
             Ctl *f = &d->ctl[d->focus];
             int shift = keys[0x2a] || keys[0x36];
-            if (sc == 0x01) result = 0;
+#if defined(__vita__) || defined(__PSP__) || defined(TT_TOUCHKB)
+            if (sc == 0x3d && d->ctl[d->focus].type == CT_EDIT) { kb_hidden = !kb_hidden; sc = 0; }       /* triangle: show / hide the keyboard */
+            if (sc == 0x1f && d->ctl[d->focus].type != CT_EDIT)       /* square = "no" in yes/no questions */
+                for (int i = 0; i < d->n; i++)
+                    if (d->ctl[i].type == CT_BUTTON && d->ctl[i].hotkey == 'N') { result = d->ctl[i].result; sc = 0; break; }
+#endif
+            if (sc == 0) { /* handled above */ }
+            else if (sc == 0x01) result = 0;
             else if (sc == 0x0f) focus_next(d, shift ? -1 : 1);
             else if (sc == 0x1c || sc == 0x9c || sc == 0x39) {
                 if (f->type == CT_BUTTON) result = f->result;
