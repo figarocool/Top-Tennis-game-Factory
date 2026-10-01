@@ -57,6 +57,17 @@ int act_credits(Menu *m, MenuItem *it)
     screen_show_image("DATA\\BACKGND\\CREDITS.PBM");
     Palette p;
     pal_load("DATA\\PAL\\CREDITS.PAL", &p);
+    {   /* the port's credit, under "Created by John Dolph", in the blue of that line */
+        int best = 1, bd = 1 << 30;
+        for (int i = 1; i < 256; i++) {
+            int dr = p.c[i][0] - 10, dg = p.c[i][1] - 28, db = p.c[i][2] - 62;        /* 6-bit DAC values of a bright blue */
+            int d = dr * dr + dg * dg + db * db;
+            if (d < bd) { bd = d; best = i; }
+        }
+        const char *line = "porting by Stefano Basile";
+        font_select(5);
+        text_at(line, best, DST_PAGE, 56, 190 - text_pix_width(line) / 2 + 10);
+    }
     video_fade_in(&p, 2);
     wait_all_keys_up();
     wait_any_key();
