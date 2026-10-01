@@ -13,6 +13,9 @@ extern uint8_t keys[256];
 
 int      plat_init(void);
 void     plat_quit(void);
+int      plat_mouse(int *x, int *y);          /* pointer in 320x200 game pixels; returns 1 while the button is down.
+                                               * PC: the mouse. Vita: left stick moves it, cross or a tap clicks */
+int      plat_touch_get(float *x, float *y);   /* pop one finger-down (normalised 0..1 screen coords), 0 if none */
 void     plat_poll(void);                /* pump SDL events, update keys[]; sets quit_requested on window close */
 extern int quit_requested;
 

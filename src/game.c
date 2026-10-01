@@ -50,8 +50,7 @@ int game_boot(const char *dir)
     char p[512];
     snprintf(p, sizeof p, "%s/TENNIS.DAT", dir);
     if (pak_open(p)) { fprintf(stderr, "cannot open %s\n", p); return -1; }
-    snprintf(p, sizeof p, "%s/TENNIS.EXE", dir);
-    if (ds_load(p)) { fprintf(stderr, "cannot read the data segment of %s\n", p); return -1; }
+    if (ds_load(NULL)) return -1;
     if (plat_init() || video_init()) return -1;
     if (load_court_assets()) return -1;
     if (hud_init()) return -1;

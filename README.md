@@ -2,13 +2,14 @@
 
 Riscrittura fedele di *Top Tennis* (The Game Factory, 1997, DOS / Borland Pascal 7) ottenuta dal reverse
 engineering di `TENNIS.EXE`. Il codice è C puro; **gli asset non sono inclusi**: il gioco legge
-`TENNIS.DAT` e i dati inizializzati di `TENNIS.EXE` dalla cartella del gioco originale.
+`TENNIS.DAT` (grafica e suoni) dalla cartella del gioco originale. Le tabelle e i testi del segmento dati del
+programma sono compilati dentro (`src/dsdata.c`, generato da `tools/gen_dsdata.py`): `TENNIS.EXE` non serve più.
 
 ## Compilare ed eseguire
 
     sudo apt install build-essential libsdl2-dev
     make
-    ./toptennis [cartella_del_gioco]        # default: ./orig  (deve contenere TENNIS.DAT e TENNIS.EXE)
+    ./toptennis [cartella_del_gioco]        # default: ./orig  (deve contenere TENNIS.DAT)
 
 TENNIS.OPT, TENNIS.HAL, TOURNAMN.nnn, SEASON.nnn e REPLAY.nnn vengono letti/scritti in quella cartella.
 F11 = schermo intero. Tasti di gioco come nel manuale originale (ESC esce dalla partita, F3 replay, F5 pausa, F10 boss).
@@ -42,7 +43,7 @@ Il progetto per VitaSDK è in `vita/`:
     export VITASDK=/usr/local/vitasdk
     cd vita && mkdir build && cd build && cmake .. && make      # produce TopTennis.vpk
 
-Installa il VPK (VitaShell) e copia `TENNIS.DAT` e `TENNIS.EXE` del gioco originale in `ux0:data/TopTennis/`
+Installa il VPK (VitaShell) e copia `TENNIS.DAT` del gioco originale in `ux0:data/TopTennis/`
 (lì vengono scritti anche opzioni, salvataggi e replay). Comandi: croce/levetta = frecce, croce = invio/fuoco,
 cerchio = Esc, triangolo = F3 (replay), quadrato = S, Start = pausa, L = Y, R = N. Nei campi nome:
 su/giù cambiano la lettera, destra passa alla successiva, sinistra cancella, croce conferma.

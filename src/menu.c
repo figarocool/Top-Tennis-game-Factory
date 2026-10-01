@@ -119,6 +119,7 @@ void cursor_init(void)
 
 void cursor_draw(void)
 {
+    plat_mouse(&mouse_x, &mouse_y);
     if (cursor_img) blit(vpage, VW, VH, cursor_img, mouse_x + scroll_x, mouse_y + scroll_y);
 }
 
@@ -194,13 +195,8 @@ int menu_run(Menu *m)
                 if (it->hot[kk] == c) { m->sel = i; result = activate(m, i); break; }
             }
         }
-        int mx, my;
-        Uint32 b = SDL_GetMouseState(&mx, &my);
-        int ww, wh;
-        SDL_Window *w = SDL_GetMouseFocus();
-        if (w) { SDL_GetWindowSize(w, &ww, &wh); mouse_x = mx * SCR_W / ww; mouse_y = my * SCR_H / wh; }
         mouse_btn_prev = mouse_btn;
-        mouse_btn = (b & SDL_BUTTON(1)) != 0;
+        mouse_btn = plat_mouse(&mouse_x, &mouse_y);
         if (mouse_btn && !mouse_btn_prev)
             for (int i = 0; i < m->n; i++)
                 if (hit(&m->items[i], mouse_x, mouse_y)) { m->sel = i; result = activate(m, i); break; }

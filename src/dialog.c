@@ -195,7 +195,7 @@ static int default_button(const Dialog *d)
     return 0;
 }
 
-#ifdef __vita__
+#if defined(__vita__) || defined(TT_TOUCHKB)
 /* no keyboard: Up/Down cycle the letter before the cursor, Right starts the next letter, Left erases */
 static void vita_letter(Ctl *c, int sc)
 {
@@ -225,9 +225,40 @@ static void vita_letter(Ctl *c, int sc)
 }
 #endif
 
+#if defined(__vita__) || defined(TT_TOUCHKB)
+/* On-screen keyboard for the touch screen: 14 x 3 keys under the dialog. */
+enum { VK_COLS = 14, VK_ROWS = 3, VK_W = 22, VK_H = 18, VK_X = 6, VK_Y = 145 };
+static const char vk_keys[VK_COLS * VK_ROWS + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-\x04\x03\x01\x02";   /* 4 space, 3 backspace, 1 OK, 2 cancel */
+
+static void vk_draw(void)
+{
+    for (int r = 0; r < VK_ROWS; r++)
+        for (int c = 0; c < VK_COLS; c++) {
+            int x = VK_X + c * VK_W, y = VK_Y + r * VK_H;
+            char k = vk_keys[r * VK_COLS + c];
+            ui_fill(3, x, y, x + VK_W - 1, y + VK_H - 1);
+            ui_bevel(C_DARK, C_LIGHT, 1, y + VK_H - 1, x + VK_W - 1, y, x);
+            char lab[3] = { k, 0, 0 };
+            if (k == 1) { lab[0] = 'O'; lab[1] = 'K'; }
+            else if (k == 2) lab[0] = 'X';
+            else if (k == 3) lab[0] = '<';
+            else if (k == 4) lab[0] = '_';
+            text_at(lab, k < 5 ? 14 : 15, DST_PAGE, y + 5, x + (lab[1] ? 3 : 8));
+        }
+}
+
+/* key under the game-pixel position, or 0 */
+static int vk_hit(int gx, int gy)
+{
+    int c = (gx - VK_X) / VK_W, r = (gy - VK_Y) / VK_H;
+    if (gx < VK_X || gy < VK_Y || c >= VK_COLS || r >= VK_ROWS) return 0;
+    return vk_keys[r * VK_COLS + c];
+}
+#endif
+
 static void edit_key(Ctl *c, int sc, int ch)
 {
-#ifdef __vita__
+#if defined(__vita__) || defined(TT_TOUCHKB)
     if (sc == 0xc8 || sc == 0xd0 || sc == 0xcb || sc == 0xcd) { vita_letter(c, sc); return; }
 #endif
     int len = (int)strlen(c->buf);
@@ -256,6 +287,11 @@ int dialog_run(Dialog *d)
     while (result < 0 && !quit_requested) {
         memcpy(vpage, snap, sizeof snap);
         draw_dialog(d);
+#if defined(__vita__) || defined(TT_TOUCHKB)
+        static int kb_hidden;
+        int kb = d->ctl[d->focus].type == CT_EDIT && !kb_hidden;
+        if (kb) vk_draw();
+#endif
         cursor_draw();
         video_wait_vsync();
         int sc = key_pressed_scancode();
@@ -288,15 +324,28 @@ int dialog_run(Dialog *d)
             }
         }
         /* mouse: click on a control */
-        int mx, my;
+        int mx = 0, my = 0;
         static int prev;
-        Uint32 b = SDL_GetMouseState(&mx, &my);
-        SDL_Window *w = SDL_GetMouseFocus();
-        if (w) {
-            int ww, wh; SDL_GetWindowSize(w, &ww, &wh);
-            mx = mx * SCR_W / ww; my = my * SCR_H / wh;
-            int down = (b & SDL_BUTTON(1)) != 0;
-            if (down && !prev)
+        {
+            int down = plat_mouse(&mx, &my);
+            int click = down && !prev;
+#if defined(__vita__) || defined(TT_TOUCHKB)
+            if (click && d->ctl[d->focus].type == CT_EDIT) {
+                Ctl *f = &d->ctl[d->focus];
+                int inside_edit = mx >= f->x && mx <= f->x + f->w && my >= f->y && my <= f->y + f->h;
+                if (kb && my >= VK_Y) {                    /* a key of the touch keyboard */
+                    int k = vk_hit(mx, my);
+                    if (k == 1) result = default_button(d);
+                    else if (k == 2) result = 0;
+                    else if (k == 3) edit_key(f, 0x0e, 0);
+                    else if (k == 4) edit_key(f, 0x39, ' ');
+                    else if (k) edit_key(f, 0, k);
+                    click = 0;
+                } else if (inside_edit) { kb_hidden = 0; click = 0; }        /* tap the field: keyboard back */
+                else if (kb) { kb_hidden = 1; click = 0; }                      /* tap elsewhere: close it */
+            }
+#endif
+            if (click)
                 for (int i = 0; i < d->n; i++) {
                     Ctl *c = &d->ctl[i];
                     if (!focusable(c) || mx < c->x || mx > c->x + c->w || my < c->y || my > c->y + c->h) continue;

@@ -1,12 +1,11 @@
-/* Initialised data segment (DS = 1030) of the original TENNIS.EXE.
- * The game keeps many constant tables there (animation frames, menu strings, player names...).
- * We read them straight from the user's original executable so no game data is redistributed. */
+/* Initialised data segment (DS = 1030) of the original program: constant tables (animation frames, key tables,
+ * menu strings, player names...). It is compiled in from src/dsdata.c; the graphics and sounds stay in TENNIS.DAT. */
 #ifndef DSIMG_H
 #define DSIMG_H
 #include <stdint.h>
 #include <stddef.h>
 
-int  ds_load(const char *exe_path);
+int  ds_load(const char *unused);
 extern uint8_t *ds_data;
 extern size_t   ds_size;
 

@@ -72,6 +72,10 @@ void plat_quit(void) { SDL_Quit(); }
 /* The Vita has no keyboard: the pad drives the same key table the DOS game reads.
  * d-pad / left stick = arrows, cross = Enter+Space (fire), circle = Esc, triangle = F3 (replay), square = S,
  * start = F5 (pause), select = F10, L = Y, R = N. */
+static float vcur_x = 160, vcur_y = 100;
+static int   vcur_btn, vmenu_mode, vcur_active;
+static Uint32 vtap_until;
+
 static void vita_pad(void)
 {
     static SDL_Joystick *pad;
@@ -81,9 +85,23 @@ static void vita_pad(void)
     memset(want, 0, sizeof want);
     int ax = SDL_JoystickGetAxis(pad, 0), ay = SDL_JoystickGetAxis(pad, 1);
     #define B(n) SDL_JoystickGetButton(pad, n)
-    want[0xc8] = B(8) || ay < -16000;  want[0xd0] = B(6) || ay > 16000;
-    want[0xcb] = B(7) || ax < -16000;  want[0xcd] = B(9) || ax > 16000;
-    want[0x1c] = want[0x39] = B(2);    want[0x01] = B(1);
+    int menu = vmenu_mode > 0;                       /* a menu or dialog is polling the pointer */
+    if (vmenu_mode > 0) vmenu_mode--;
+    want[0xc8] = B(8) || (!menu && ay < -16000);  want[0xd0] = B(6) || (!menu && ay > 16000);
+    want[0xcb] = B(7) || (!menu && ax < -16000);  want[0xcd] = B(9) || (!menu && ax > 16000);
+    if (menu) {                                      /* left stick = mouse pointer, cross = click while it is in use */
+        int dx = abs(ax) > 6000 ? ax : 0, dy = abs(ay) > 6000 ? ay : 0;
+        if (dx || dy) {
+            vcur_x += dx / 32768.0f * 3.0f; vcur_y += dy / 32768.0f * 3.0f;
+            vcur_x = vcur_x < 0 ? 0 : vcur_x > 319 ? 319 : vcur_x;
+            vcur_y = vcur_y < 0 ? 0 : vcur_y > 199 ? 199 : vcur_y;
+            vcur_active = 200;
+        } else if (vcur_active > 0) vcur_active--;
+        if (B(6) || B(7) || B(8) || B(9)) vcur_active = 0;
+    } else vcur_active = 0;
+    vcur_btn = vcur_active > 0 && B(2);
+    int pointer_click = vcur_active > 0 && menu;
+    want[0x1c] = want[0x39] = B(2) && !pointer_click;  want[0x01] = B(1);
     want[0x3d] = B(0);                 want[0x1f] = B(3);
     want[0x3f] = B(11);                want[0x44] = B(10);
     want[0x15] = B(4);                 want[0x31] = B(5);
@@ -97,6 +115,19 @@ static void vita_pad(void)
 }
 #endif
 
+#ifdef __vita__
+#endif
+static float touch_x, touch_y;
+static int   touch_pending;
+
+int plat_touch_get(float *x, float *y)
+{
+    if (!touch_pending) return 0;
+    touch_pending = 0;
+    *x = touch_x; *y = touch_y;
+    return 1;
+}
+
 void plat_poll(void)
 {
 #ifdef __vita__
@@ -106,6 +137,18 @@ void plat_poll(void)
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
         case SDL_QUIT: quit_requested = 1; break;
+        case SDL_FINGERDOWN: touch_x = e.tfinger.x; touch_y = e.tfinger.y; touch_pending = 1;
+#ifdef __vita__
+            {   /* the 960x720 logical screen is fitted into 960x544: map the touch to game pixels */
+                float scale = 544.0f / 720.0f, xoff = (960.0f - 960.0f * scale) / 2;
+                vcur_x = (e.tfinger.x * 960.0f - xoff) / scale / 3.0f;
+                vcur_y = e.tfinger.y * 544.0f / scale * 200.0f / 720.0f;
+                vcur_x = vcur_x < 0 ? 0 : vcur_x > 319 ? 319 : vcur_x;
+                vcur_y = vcur_y < 0 ? 0 : vcur_y > 199 ? 199 : vcur_y;
+                vtap_until = SDL_GetTicks() + 70;
+            }
+#endif
+            break;
         case SDL_KEYDOWN: case SDL_KEYUP: {
             int sc = sc_map[e.key.keysym.scancode];
             if (!sc) break;
@@ -170,4 +213,23 @@ uint16_t rnd(uint16_t n)
 {
     seed = seed * 134775813u + 1;                    /* BP7 System.Random */
     return (uint16_t)(((uint64_t)(seed >> 16) * n) >> 16);
+}
+
+int plat_mouse(int *x, int *y)
+{
+#ifdef __vita__
+    vmenu_mode = 4;
+    *x = (int)vcur_x; *y = (int)vcur_y;
+    return vcur_btn || SDL_GetTicks() < vtap_until;
+#else
+    int mx, my;
+    Uint32 b = SDL_GetMouseState(&mx, &my);
+    SDL_Window *w = SDL_GetMouseFocus();
+    if (w) {
+        int ww, wh;
+        SDL_GetWindowSize(w, &ww, &wh);
+        *x = mx * SCR_W / ww; *y = my * SCR_H / wh;
+    }
+    return (b & SDL_BUTTON(1)) != 0;
+#endif
 }

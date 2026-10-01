@@ -1,4 +1,4 @@
-/* Top Tennis - C port. Usage: toptennis [data dir containing TENNIS.DAT and TENNIS.EXE] */
+/* Top Tennis - C port. Usage: toptennis [data dir containing TENNIS.DAT] */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,12 +18,17 @@
 int main(int argc, char **argv)
 {
 #ifdef __vita__
-    const char *dir = "ux0:data/TopTennis";           /* copy TENNIS.DAT and TENNIS.EXE of the original game here */
+    const char *dir = "ux0:data/TopTennis";           /* copy TENNIS.DAT of the original game here */
     (void)argc; (void)argv;
 #else
     const char *dir = argc > 1 ? argv[1] : "orig";
 #endif
     snprintf(data_dir, sizeof data_dir, "%s", dir);
+#ifdef __vita__
+    freopen("ux0:data/TopTennis/log.txt", "w", stderr);        /* for diagnosing problems on the console */
+    setvbuf(stderr, NULL, _IONBF, 0);
+    fprintf(stderr, "Top Tennis starting\n");
+#endif
     if (game_boot(dir)) return 1;
     cursor_init();
     opt_defaults();
