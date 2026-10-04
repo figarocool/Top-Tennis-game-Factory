@@ -1,0 +1,44 @@
+# game assets and copyrighted material are never committed
+/orig/
+/data/
+/TOPTEN FULL.RAR
+/build/
+/toptennis
+/tools/assetview
+/tests/test_gfx
+/ghidra_proj/
+__pycache__/
+# reverse-engineering artefacts that contain game code/data or screenshots
+/re/*.bin
+/re/decomp.c
+/re/decomp_clean.c
+/re/dat_index.txt
+/re/funcs.tsv
+/re/strings.txt
+/re/dos/
+/re/preview/
+
+/psp/build/
+/vita/private_art/
+/vita/build-public/
+/psp/private_art/
+/psp/build-public/
+/prepared/
+/dist/
+/build-release/
+/tests/__pycache__/
+/tests/test_dsimg
+/tests/test_ctrl
+/tests/test_engine
+/tests/test_pak
+/tests/test_net
+/tests/test_pointer
+/tests/test_state
+/tests/test_score
+/tests/test_court
+/ANALISI-LEGALE.it.md
+
+# private review reports
+/PROVENANCE.md
+/re/ANALYSIS.md
+/private-reports/
